@@ -56,7 +56,7 @@
 		$total_followers = \ORM::for_table('user')->where('exclude', 0)->where('follower', 1)->count();
 
 		$not_following = \ORM::for_table('user')->where('exclude', 0)->where('follower', 0)->find_many();
-
+		$not_following_count = \ORM::for_table('user')->where('exclude', 0)->where('follower', 0)->count();
 		$users_unfollowing = array();
 		foreach($not_following as $user) {
 			$users_unfollowing[] = array(
@@ -70,12 +70,59 @@
 			'total_entries' => $total_entries,
 			'total_users' => $total_users,
 			'total_followers' => $total_followers,
-			'users_unfollowing' => $users_unfollowing
+			'users_unfollowing' => $users_unfollowing,
+			'unfollowing_count' => $not_following_count
 		));
 	});
 
 	$app->map('/track', function() use($app) {
-		
+		if($app->request->isPost()) { // We need to process the URL and get the tweet id from it.
+			$url = $app->request->post('twitterurl');
+			$pieces = parse_url($url);
+			$parts = explode('/', $pieces['path']);
+			$id = array_pop($parts);
+
+			$tweetcount = \ORM::for_table('tracktweet')->where('tweetid', $id)->count();
+			if($tweetcount === 0) {
+				// Add it to the database.
+				$track = \ORM::for_table('tracktweet')->create();
+				$track->tweetid = $id;
+				$track->lasttracked = time();
+				$track->save();
+				$app->flash('success', 'Added Status to Tracker.');
+			} else {
+				$app->flash('danger', 'Status is already being tracked.');
+			}
+
+			$app->redirect('/');
+		}
+		$app->render('track.php', array());
 	})->via('GET', 'POST')->name('track');
 
+	$app->post('/search', function() use($app) {
+		$username = $app->request->post('username');
+		$search_results = \ORM::for_table('user')->where_like('username', '%'.$username.'%')->find_many();
+		$search_count = \ORM::for_table('user')->where_like('username', '%'.$username.'%')->count();
+
+		$app->render('search.php', array('search_results' => $search_results, 'search_count' => $search_count));
+	});
+
+	$app->get('/user/:id', function($id) use($app) {
+
+	})->name('user');
+
+	$app->map('/findwinner', function() use($app) {
+
+	})->via('GET', 'POST')->name('winner');
+
 	$app->run();
+
+
+
+
+
+
+
+
+
+
