@@ -1,0 +1,21 @@
+{
+	"name":"tylerjuniorcollege/simplecontestbot",
+	"description":"Simple Twitter Contest Bot",
+	"license":"MIT",
+	"authors":[
+		{
+			"name":"Duane Jeffers",
+			"role":"developer",
+			"email":"djef@tjc.edu"
+		}
+	],
+	"require":{
+		"slim/slim": "2.*",
+		"j4mie/idiorm": "1.5.1",
+		"tylerjuniorcollege/slim-layout":"dev-master",
+		"duanejeffers/cli.class.php": "dev-master",
+		"filp/whoops": "1.*",
+		"zeuxisoo/slim-whoops": "0.2.0",
+		"jublonet/codebird-php": "2.6.0"
+	}
+}

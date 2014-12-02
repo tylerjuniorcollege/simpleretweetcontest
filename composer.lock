@@ -1,0 +1,447 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "This file is @generated automatically"
+    ],
+    "hash": "a0be78b7218a897cf500542b084b70d0",
+    "packages": [
+        {
+            "name": "composer/installers",
+            "version": "v1.0.18",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/composer/installers.git",
+                "reference": "74fb0a7a1a23696d9c8cc2fba5903f6711cdd067"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/composer/installers/zipball/74fb0a7a1a23696d9c8cc2fba5903f6711cdd067",
+                "reference": "74fb0a7a1a23696d9c8cc2fba5903f6711cdd067",
+                "shasum": ""
+            },
+            "replace": {
+                "roundcube/plugin-installer": "*",
+                "shama/baton": "*"
+            },
+            "require-dev": {
+                "composer/composer": "1.0.*@dev",
+                "phpunit/phpunit": "4.1.*"
+            },
+            "type": "composer-installer",
+            "extra": {
+                "class": "Composer\\Installers\\Installer",
+                "branch-alias": {
+                    "dev-master": "1.0-dev"
+                }
+            },
+            "autoload": {
+                "psr-0": {
+                    "Composer\\Installers\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Kyle Robinson Young",
+                    "email": "kyle@dontkry.com",
+                    "homepage": "https://github.com/shama"
+                }
+            ],
+            "description": "A multi-framework Composer library installer",
+            "homepage": "http://composer.github.com/installers/",
+            "keywords": [
+                "Craft",
+                "Dolibarr",
+                "Hurad",
+                "MODX Evo",
+                "OXID",
+                "WolfCMS",
+                "agl",
+                "annotatecms",
+                "bitrix",
+                "cakephp",
+                "chef",
+                "codeigniter",
+                "concrete5",
+                "croogo",
+                "drupal",
+                "elgg",
+                "fuelphp",
+                "installer",
+                "joomla",
+                "kohana",
+                "laravel",
+                "lithium",
+                "magento",
+                "mako",
+                "mediawiki",
+                "modulework",
+                "moodle",
+                "phpbb",
+                "piwik",
+                "ppi",
+                "puppet",
+                "roundcube",
+                "shopware",
+                "silverstripe",
+                "symfony",
+                "typo3",
+                "wordpress",
+                "zend",
+                "zikula"
+            ],
+            "time": "2014-08-18 20:00:12"
+        },
+        {
+            "name": "duanejeffers/cli.class.php",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/duanejeffers/cli.class.php.git",
+                "reference": "4475fa1aa0300ff01afd95ed0b520f7f23e1ca50"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/duanejeffers/cli.class.php/zipball/4475fa1aa0300ff01afd95ed0b520f7f23e1ca50",
+                "reference": "4475fa1aa0300ff01afd95ed0b520f7f23e1ca50",
+                "shasum": ""
+            },
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "Cli.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Duane Jeffers",
+                    "email": "duane@duanejeffers.com",
+                    "homepage": "http://duanejeffers.com/",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Simple object for creating CLI programs in PHP",
+            "time": "2013-12-02 22:30:19"
+        },
+        {
+            "name": "filp/whoops",
+            "version": "1.1.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/filp/whoops.git",
+                "reference": "a85fab9a98f1f9b8ebcdbe71733f0d910e5b9adf"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/filp/whoops/zipball/a85fab9a98f1f9b8ebcdbe71733f0d910e5b9adf",
+                "reference": "a85fab9a98f1f9b8ebcdbe71733f0d910e5b9adf",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.0"
+            },
+            "require-dev": {
+                "mockery/mockery": "0.9.*"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.2-dev"
+                }
+            },
+            "autoload": {
+                "psr-0": {
+                    "Whoops": "src/"
+                },
+                "classmap": [
+                    "src/deprecated"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Filipe Dobreira",
+                    "homepage": "https://github.com/filp",
+                    "role": "Developer"
+                }
+            ],
+            "description": "php error handling for cool kids",
+            "homepage": "https://github.com/filp/whoops",
+            "keywords": [
+                "error",
+                "exception",
+                "handling",
+                "library",
+                "silex-provider",
+                "whoops",
+                "zf2"
+            ],
+            "time": "2014-10-26 09:05:09"
+        },
+        {
+            "name": "j4mie/idiorm",
+            "version": "v1.5.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/j4mie/idiorm.git",
+                "reference": "b0922d8719a94e3a0e0e4a0ca3876f4f91475dcf"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/j4mie/idiorm/zipball/b0922d8719a94e3a0e0e4a0ca3876f4f91475dcf",
+                "reference": "b0922d8719a94e3a0e0e4a0ca3876f4f91475dcf",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.2.0"
+            },
+            "type": "library",
+            "autoload": {
+                "classmap": [
+                    "idiorm.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-2-Clause",
+                "BSD-3-Clause",
+                "BSD-4-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Simon Holywell",
+                    "email": "treffynnon@php.net",
+                    "homepage": "http://simonholywell.com",
+                    "role": "Maintainer"
+                },
+                {
+                    "name": "Jamie Matthews",
+                    "email": "jamie.matthews@gmail.com",
+                    "homepage": "http://j4mie.org",
+                    "role": "Developer"
+                },
+                {
+                    "name": "Durham Hale",
+                    "email": "me@durhamhale.com",
+                    "homepage": "http://durhamhale.com",
+                    "role": "Maintainer"
+                }
+            ],
+            "description": "A lightweight nearly-zero-configuration object-relational mapper and fluent query builder for PHP5",
+            "homepage": "http://j4mie.github.com/idiormandparis",
+            "keywords": [
+                "idiorm",
+                "orm",
+                "query builder"
+            ],
+            "time": "2014-06-23 13:08:57"
+        },
+        {
+            "name": "jublonet/codebird-php",
+            "version": "2.6.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/jublonet/codebird-php.git",
+                "reference": "c767eab4143a72917411345c69e3d931670e6eb0"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/jublonet/codebird-php/zipball/c767eab4143a72917411345c69e3d931670e6eb0",
+                "reference": "c767eab4143a72917411345c69e3d931670e6eb0",
+                "shasum": ""
+            },
+            "require": {
+                "composer/installers": "~1.0",
+                "ext-hash": "*",
+                "ext-json": "*",
+                "lib-openssl": "*"
+            },
+            "type": "library",
+            "autoload": {
+                "classmap": [
+                    "src/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-3.0+"
+            ],
+            "authors": [
+                {
+                    "name": "Joshua Atkins",
+                    "email": "joshua.atkins@jublo.net",
+                    "homepage": "http://atkins.im/",
+                    "role": "Developer"
+                },
+                {
+                    "name": "J.M.",
+                    "email": "jm@jublo.net",
+                    "homepage": "http://mynetx.net/",
+                    "role": "Developer"
+                }
+            ],
+            "description": "A Twitter library in PHP.",
+            "homepage": "http://www.jublo.net/projects/codebird/php",
+            "keywords": [
+                "api",
+                "networking",
+                "twitter"
+            ],
+            "time": "2014-10-12 11:51:42"
+        },
+        {
+            "name": "slim/slim",
+            "version": "2.4.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/codeguy/Slim.git",
+                "reference": "4906b77a07c7bd6ff1a99aea903e940a2d4fa106"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/codeguy/Slim/zipball/4906b77a07c7bd6ff1a99aea903e940a2d4fa106",
+                "reference": "4906b77a07c7bd6ff1a99aea903e940a2d4fa106",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.0"
+            },
+            "suggest": {
+                "ext-mcrypt": "Required for HTTP cookie encryption"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Slim": "."
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Josh Lockhart",
+                    "email": "info@joshlockhart.com",
+                    "homepage": "http://www.joshlockhart.com/"
+                }
+            ],
+            "description": "Slim Framework, a PHP micro framework",
+            "homepage": "http://github.com/codeguy/Slim",
+            "keywords": [
+                "microframework",
+                "rest",
+                "router"
+            ],
+            "time": "2014-04-05 18:33:59"
+        },
+        {
+            "name": "tylerjuniorcollege/slim-layout",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/tylerjuniorcollege/slim-layout.git",
+                "reference": "6835eadfd555c6c8e7743a6049f07fca7d5ca63a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/tylerjuniorcollege/slim-layout/zipball/6835eadfd555c6c8e7743a6049f07fca7d5ca63a",
+                "reference": "6835eadfd555c6c8e7743a6049f07fca7d5ca63a",
+                "shasum": ""
+            },
+            "require": {
+                "slim/slim": "2.*"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "TJC\\View\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Duane Jeffers",
+                    "email": "djef@tjc.edu",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Simple Layout Class for Slim Framework",
+            "time": "2014-11-18 22:29:21"
+        },
+        {
+            "name": "zeuxisoo/slim-whoops",
+            "version": "0.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/zeuxisoo/php-slim-whoops.git",
+                "reference": "189d6f8907e0f78d18513bb14897a91dd68a423f"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/zeuxisoo/php-slim-whoops/zipball/189d6f8907e0f78d18513bb14897a91dd68a423f",
+                "reference": "189d6f8907e0f78d18513bb14897a91dd68a423f",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.0"
+            },
+            "require-dev": {
+                "filp/whoops": "1.*",
+                "phpunit/phpunit": "3.7.*@dev",
+                "slim/slim": "2.*"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Zeuxisoo\\Whoops\\Provider\\Slim\\WhoopsMiddleware": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-2-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Zeuxis.Lo",
+                    "email": "seekstudio@gmail.com",
+                    "homepage": "http://www.chair.im/",
+                    "role": "Developer"
+                }
+            ],
+            "description": "PHP whoops error on slim framework",
+            "homepage": "https://github.com/zeuxisoo/php-slim-whoops/",
+            "keywords": [
+                "error",
+                "exception",
+                "slim",
+                "whoops"
+            ],
+            "time": "2014-04-02 04:57:23"
+        }
+    ],
+    "packages-dev": [],
+    "aliases": [],
+    "minimum-stability": "stable",
+    "stability-flags": {
+        "tylerjuniorcollege/slim-layout": 20,
+        "duanejeffers/cli.class.php": 20
+    },
+    "prefer-stable": false,
+    "platform": [],
+    "platform-dev": []
+}
