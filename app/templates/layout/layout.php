@@ -33,22 +33,29 @@
 				<ul class="nav navbar-nav">
 					<li><a href="/track">Track a Tweet</a></li>
 			  	</ul>
-				<form class="navbar-form navbar-right">
+				<form class="navbar-form navbar-right" method="POST" action="/search">
 					<div class="input-group">
 						<input type="text" name="username" placeholder="Username ..." id="searchusername" class="form-control">
 						<span class="input-group-btn">
-							<button class="btn btn-default" type="button" id="search"><span class="glyphicon glyphicon-search"></span> Search</button>
+							<button class="btn btn-default" type="submit" id="search"><span class="glyphicon glyphicon-search"></span> Search</button>
 						</span>
 					</div>
 					<div class="btn-group" role="group">
 			  			<button type="button" id="grabretweets" class="btn btn-primary" data-toggle="popover" data-content="Process Retweets"><span class="glyphicon glyphicon-retweet"></span></button>
-			  			<button type="button" id="findwinner" class="btn btn-danger" data-toggle="popover" data-content="Find a Winner"><span class="glyphicon glyphicon-user"></span></button>
+			  			<a href="/findwinner" id="findwinner" class="btn btn-danger" data-toggle="popover" data-content="Find a Winner"><span class="glyphicon glyphicon-user"></span></a>
 			  		</div>
 			  	</form>
 		  	</div>
 		</div>
-<?= $data['content']; ?>
 		<div class="container">
+			<div class="row">
+				<div class="col-md-12">
+					<?php foreach($flash as $type => $message) {
+						printf('<div class="alert alert-%s alert-dismissible fade in" role="alert"><button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>%s</div>', $type, $message);
+					} ?>
+				</div>
+			</div>
+<?= $data['content']; ?>
 			<div class="row">
 				<div class="col-md-12">
 					<p>&copy; 2014 Tyler Junior College</p>
