@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="description" content="">
+		<meta name="author" content="Tyler Junior College">
+
+		<title>Simple Retweet Contest App</title>
+
+		<?= implode($data['css']['rendered'], "\n\t\t"); ?>
+
+		<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+		<!--[if lt IE 9]>
+	  		<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+	  		<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+		<![endif]-->
+	</head>
+	<body>
+
+		<div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+			<div class="container">
+				<div class="navbar-header">
+					<button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+						<span class="sr-only">Toggle navigation</span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+					</button>
+			  		<a class="navbar-brand" href="/">Retweet Contest App</a>
+				</div>
+				<ul class="nav navbar-nav">
+					<li><a href="/track">Track a Tweet</a></li>
+			  	</ul>
+				<form class="navbar-form navbar-right">
+					<div class="input-group">
+						<input type="text" name="username" placeholder="Username ..." id="searchusername" class="form-control">
+						<span class="input-group-btn">
+							<button class="btn btn-default" type="button" id="search"><span class="glyphicon glyphicon-search"></span> Search</button>
+						</span>
+					</div>
+					<div class="btn-group" role="group">
+			  			<button type="button" id="grabretweets" class="btn btn-primary" data-toggle="popover" data-content="Process Retweets"><span class="glyphicon glyphicon-retweet"></span></button>
+			  			<button type="button" id="findwinner" class="btn btn-danger" data-toggle="popover" data-content="Find a Winner"><span class="glyphicon glyphicon-user"></span></button>
+			  		</div>
+			  	</form>
+		  	</div>
+		</div>
+<?= $data['content']; ?>
+		<div class="container">
+			<div class="row">
+				<div class="col-md-12">
+					<p>&copy; 2014 Tyler Junior College</p>
+				</div>
+		  	</div>
+		</div>
+	<?= implode($data['js']['rendered'], "\n\t"); ?>
+	</body>
+</html>
