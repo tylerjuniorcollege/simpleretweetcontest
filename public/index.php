@@ -107,7 +107,7 @@
 		$app->get('/', function() use($app) {
 			// Grab Current Statuses
 			$track = \ORM::for_table('tracktweet')->table_alias('tt')
-												  ->select_many('tt.tweetid', 'tt.lasttracked')
+												  ->select_many('tt.id', 'tt.tweetid', 'tt.lasttracked')
 												  ->select_expr('COUNT(e.tweetid)', 'rt_count')
 												  ->left_outer_join('entries', array('tt.id', '=', 'e.tweetid'), 'e')
 												  ->group_by("e.tweetid")
@@ -158,36 +158,136 @@
 
 			$app->redirect('/track');
 		});
+
+		$app->get('/view/:id', function($id) use($app) {
+
+		})->name('view-track');
+
+		$app->get('/delete/:id', function($id) use($app) {
+
+		})->name('delete-track');
 	});
 
-	$app->post('/search', function() use($app) {
-		$username = $app->request->post('username');
+	$app->map('/search', function() use($app) {
+		$username = $app->request->params('username');
 		$search_results = \ORM::for_table('user')->where_like('username', '%'.$username.'%')->find_many();
 		$search_count = \ORM::for_table('user')->where_like('username', '%'.$username.'%')->count();
 
-		$app->render('search.php', array('search_results' => $search_results, 'search_count' => $search_count));
-	});
+		if($app->request->isAjax()) {
+			$app->view->disableLayout(); // Disable the layout for this ...
+
+		} else {
+			$results = array();
+			foreach($search_results as $result) {
+				$results[] = sprintf('<tr><td><a href="%s">%s</a></td><td>%s</td></tr>', $app->urlFor('user', array('id' => $result->id)),
+																						 $result->username,
+																						 \ORM::for_table('entries')->where('userid', $result->id)->count());
+			}
+
+			$app->render('search.php', array('search_results' => implode($results), 'search_count' => $search_count));
+		}
+	})->via('GET', 'POST');
 
 	$app->get('/user/:id', function($id) use($app) {
-
+		$user = \ORM::for_table('user')->find_one($id);
+		var_dump(unserialize($user->user_object));
+		$app->render('user.php', array('username' => $user->username));
 	})->name('user');
 
-	$app->group('/winner', function() use($app) {
-		$app->get('/', function() use($app) {
-			$app->render('winner.php', array('follower_default' => 1, 'winner_default' => 0, 'exclude_default' => 1));
-		});
+	$app->map('/winner', function() use($app) {
+		$data_arr = array('follower_default' => 1, 'winner_default' => 1, 'exclude_default' => 1, 'number_default' => $app->app_settings->winner_default_limit);
+		if($app->request->isPost()) {
+			if($app->request->post('winnernumber') > 0) {
+				$data_arr['number_default'] = $limit = $app->request->post('winnernumber');
+			} else {
+				$limit = $app->app_settings->winner_default_limit;
+			}
 
-		$app->post('/find', function() use($app) {
+			$where = array();
 
-		});
-	});
+			if($app->request->post('follower') == 1) {
+				$where['u.follower'] = 1; 
+			} else {
+				$data_arr['follower_default'] = 0;
+			}
+
+			if($app->request->post('previouswinner') == 1) {
+				$where['u.winner'] = 0;
+			} else {
+				$data_arr['winner_default'] = 0;
+			}
+
+			if($app->request->post('exclude') == 1) {
+				$where['u.exclude'] = 0;
+			} else {
+				$data_arr['exclude_default'] = 0;
+			}
+
+			// We process the "winners" ..
+			$winners = \ORM::for_table('entries')->table_alias('e')
+												 ->select_many(array("userid" => "u.id", "u.twitterid", "u.username", "tt.tweetid", "trackid" => "tt.id"))
+												 ->left_outer_join('user', array('e.userid', '=', 'u.id'), 'u')
+												 ->left_outer_join('tracktweet', array('e.tweetid', '=', 'tt.id'), 'tt')
+												 ->where($where)
+												 ->order_by_expr('RANDOM()')
+												 ->limit($limit)
+												 ->find_array();
+
+			shuffle($winners);
+			shuffle($winners); // Double Shuffle to have more of a random pick
+
+			$results = array();
+			foreach($winners as $winner) {
+				$results[] = sprintf('<tr><td><a href="%s">%s</a></td><td><a href="https://twitter.com/%s" target="_blank">%s</a></td><td><a href="%s">%s</a></td></tr>', $app->urlFor('user', array('id' => $winner['userid'])),
+																																										  $winner['username'],
+																																										  $winner['username'],
+																																										  $winner['twitterid'],
+																																										  $app->urlFor('view-track', array('id' => $winner['trackid'])),
+																																										  $winner['tweetid']);
+			}
+			$data_arr['results'] = implode($results);
+
+		}
+		$app->render('winner.php', $data_arr);
+	})->via('GET', 'POST');
 
 	$app->group('/settings', function() use($app) {
 
 	});
 
-	$app->run();
+	$app->get('/cron', function() use($app) {
+		// This is the main action
+		$stats = array('msgs' => array());
+		$time = time();
+		// First things first: we need to gather all of the tweets.
 
+		$tracked_tweets = \ORM::for_table('tracktweet')->find_many();
+		foreach($tracked_tweets as $tweet) {
+			$retweeters = array();
+			$req_str = sprintf('id=%s', $tweet->tweetid);
+			$cursor = NULL;
+			do {
+				if(!is_null($cursor)) {
+					$req_str .= sprintf('&cursor=%s', $cursor);
+				}
+				$retweet_gather = $app->twitter->statuses_retweeters_ids($req_str, true);
+				$retweeters = array_merge($retweeters, $retweet_gather->ids);
+
+				if($retweet_gather->next_cursor !== 0) {
+					$cursor = $retweet_gather->next_cursor;
+				} else {
+					$cursor = NULL;
+				}
+			} while(!is_null($cursor));
+			if($app->request->isAjax()) {
+				printf('Number of Retweeters for ID#(%s): %s <br />', $tweet->tweetid, count($retweeters));
+			}
+
+
+		}
+	});
+
+	$app->run();
 
 
 
