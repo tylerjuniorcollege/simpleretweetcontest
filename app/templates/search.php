@@ -5,12 +5,11 @@
 			<thead>
 				<tr>
 					<th>Username</th>
+					<th># of Retweets</th>
 				</tr>
 			</thead>
 			<tbody>
-				<?php foreach($data['search_results'] as $result) {
-					printf('<tr><td><a href="/user/%s">%s</a></td></tr>', $result->id, $result->username);
-				} ?>
+				<?= $data['search_results']; ?>
 			</tbody>
 		</table>
 	</div>
