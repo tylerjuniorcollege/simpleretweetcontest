@@ -3,7 +3,7 @@
 		<div class="col-md-12">
 			<h3 class="page-header">Track a Twitter Status Update</h3>
 
-			<form method="POST" class="form-horizontal" role="form">
+			<form method="POST" action="/track/add" class="form-horizontal" role="form">
 				<div class="form-group">
 					<label for="twitterurl" class="col-sm-2 control-label">Twitter URL</label>
 					<div class="col-sm-10">
