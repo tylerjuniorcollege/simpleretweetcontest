@@ -46,9 +46,7 @@
 				</tr>
 			</thead>
 			<tbody>
-			<?php foreach($data['users_unfollowing'] as $row): ?>
-				<?= sprintf('<tr><td>%s</td><td>%s</td></tr>', $row['username'], $row['entry_count']); ?>
-			<?php endforeach; ?>
+			<?=($data['users_unfollowing']) ?>
 			</tbody>
 		</table>
 	</div>
@@ -64,9 +62,7 @@
 				</tr>
 			</thead>
 			<tbody>
-			<?php foreach($data['tweet_stats'] as $row): ?>
-				<?= sprintf('<tr><td><a href="https://%s</td><td>%s</td></tr>', $row['username'], $row['entry_count']); ?>
-			<?php endforeach; ?>
+			<?=$data['tweet_stats'] ?>
 			</tbody>
 		</table>
 	</div>
