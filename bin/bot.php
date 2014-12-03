@@ -12,10 +12,19 @@
 	));
 
 	\ORM::configure('sqlite:../data/database.db');
-	
+
+	// Setup Codebird Twitter stuff.
+	$consumer_key = \ORM::for_table('settings')->where('name', 'twitter_consumer_key')->find_one();
+	$consumer_secret = \ORM::for_table('settings')->where('name', 'twitter_consumer_secret')->find_one();
+
+	\Codebird\Codebird::setConsumerKey($consumer_key->value, $consumer_secret->value);	
 
 	$twitter = \Codebird\Codebird::getInstance();
 
+	$user_token = \ORM::for_table('settings')->where('name', 'twitter_access_token')->find_one();
+	$user_secret = \ORM::for_table('settings')->where('name', 'twitter_access_token_secret')->find_one();
+
+	$twitter->setToken($user_token->value, $user_secret->value);
 
 	// Adding in time for timestamps.
 	$time = time();
@@ -69,10 +78,10 @@
 
 				if($user_search === false) {
 					// Grab the information from the API.
-					$user_info = $twitter->users_show(sprintf('user_id=%s', $rtid));
+					$user_info = $twitter->users_show(sprintf('user_id=%s', $rtid), true);
 					// Now we need to create the user object.
 					$user_db = \ORM::for_table('user')->create();
-					$user_db->twitterid = $user_info->id;
+					$user_db->twitterid = $rtid;
 					$user_db->username = $user_info->screen_name;
 					$user_db->user_object = serialize($user_info);
 					$user_db->added = $time;
@@ -80,6 +89,7 @@
 					$user = $user_db;
 					unset($user_db);
 					$cli->print_line(sprintf('Added User (%s) to the database', $user->username));
+					sleep(5);
 				} else {
 					$user = $user_search;
 					unset($user_search);
