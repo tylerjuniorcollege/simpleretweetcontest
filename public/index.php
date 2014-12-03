@@ -135,9 +135,19 @@
 
 	})->name('user');
 
-	$app->map('/findwinner', function() use($app) {
+	$app->group('/winner', function() use($app) {
+		$app->get('/', function() use($app) {
+			$app->render('winner.php', array('follower_default' => 1, 'winner_default' => 0, 'exclude_default' => 1));
+		});
 
-	})->via('GET', 'POST')->name('winner');
+		$app->post('/find', function() use($app) {
+
+		});
+	});
+
+	$app->group('/settings', function() use($app) {
+
+	});
 
 	$app->run();
 

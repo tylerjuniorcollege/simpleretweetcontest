@@ -42,7 +42,7 @@
 					</div>
 					<div class="btn-group" role="group">
 			  			<button type="button" id="grabretweets" class="btn btn-primary" data-toggle="popover" data-content="Process Retweets"><span class="glyphicon glyphicon-retweet"></span></button>
-			  			<a href="/findwinner" id="findwinner" class="btn btn-danger" data-toggle="popover" data-content="Find a Winner"><span class="glyphicon glyphicon-user"></span></a>
+			  			<a href="/winner" id="findwinner" class="btn btn-danger" data-toggle="popover" data-content="Find a Winner"><span class="glyphicon glyphicon-user"></span></a>
 			  		</div>
 			  	</form>
 		  	</div>
