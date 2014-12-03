@@ -58,7 +58,7 @@
 <?= $data['content']; ?>
 			<div class="row">
 				<div class="col-md-12">
-					<p>&copy; 2014 Tyler Junior College</p>
+					<p><?= $data['copyright'] ?></p>
 				</div>
 		  	</div>
 		</div>
