@@ -97,9 +97,28 @@
 
 			$active_track = array();
 			foreach($track as $t) {
-				//$active_track[] = sprintf('<tr><td><a href="%s">%s</a></td><td>%s</td><td><a href="%s">Stop Tracking</a></td></tr>');	
+				$active_track[] = sprintf('<tr><td><a href="%s">%s</a></td><td>%s</td><td>%s</td><td><a href="%s">Stop Tracking</a></td></tr>', $app->urlFor('view-track', array('id' => $t->id)),
+																																	 			$t->tweetid,
+																																	 			$t->rt_count,
+																																	 			date(DATE_FMT, $t->lasttracked),
+																																	 			$app->urlFor('delete-track', array('id' => $t->id)));	
 			}
-			$app->render('track.php', array());
+
+			$timeline = $app->twitter->statuses_userTimeline(sprintf('screen_name=%s&count=50&trim_user=true&exclude_replies=true', $app->app_settings->twitter_username), true);
+
+			$track_timeline = array();
+			foreach((array) $timeline as $tweet) {
+				if(!is_object($tweet)) {
+					continue;
+				}
+				$tweeturl = sprintf('https://twitter.com/%s/status/%s', $app->app_settings->twitter_username, $tweet->id);
+				$tracked = \ORM::for_table('tracktweet')->where('tweetid', $tweet->id)->count();
+				$track_timeline[] = sprintf('<tr><td>%s</td><td>%s</td><td><button class="tracktweet btn btn-default" value="%s"%s>Track</button></td></tr>', $tweet->id,
+																																							  $tweet->text,
+																																							  $tweeturl,
+																																							  ($tracked > 0 ? ' disabled="disabled"' : ''));
+			}
+			$app->render('track.php', array('active_track' => implode($active_track), 'timeline' => implode($track_timeline), 'username' => $app->app_settings->twitter_username));
 		});
 
 		$app->post('/add', function() use($app) {
