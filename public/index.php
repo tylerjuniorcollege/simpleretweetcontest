@@ -53,34 +53,41 @@
 	$app->twitter->setToken($app->app_settings->twitter_access_token, $app->app_settings->twitter_access_token_secret);
 
 	$app->get('/', function() use($app) {
-		$last_run_date = date('l, F j, Y h:i:s', $app->app_settings->last_run);
+		$last_run_date = date(DATE_FMT, $app->app_settings->last_run);
 
 		$total_entries = \ORM::for_table('entries')->count();
 		$total_users = \ORM::for_table('user')->where('exclude', 0)->count();
 		$total_followers = \ORM::for_table('user')->where('exclude', 0)->where('follower', 1)->count();
+
+		$total_track = \ORM::for_table('tracktweet')->count();
 
 		$not_following = \ORM::for_table('user')->where('exclude', 0)->where('follower', 0)->find_many();
 		$not_following_count = \ORM::for_table('user')->where('exclude', 0)->where('follower', 0)->count();
 
 		$users_unfollowing = array();
 		foreach($not_following as $user) {
-			$users_unfollowing[] = sprintf('<tr><td>%s</td><td>%s</td></tr>', 
+			$users_unfollowing[] = sprintf('<tr><td><a href="https://twitter.com/%s" target="_blank">%s</a></td><td>%s</td></tr>',
+										   $user->username,
 										   $user->username, 
 										   \ORM::for_table('entries')->where('userid', $user->id)->count());
 		}
 
 		$stats = \ORM::for_table('tracktweet')->table_alias('tt')
-											  ->select('tt.tweetid')
+											  ->select_many('tt.id', 'tt.tweetid')
 											  ->select_expr('COUNT(e.tweetid)', 'rt_count')
 											  ->left_outer_join('entries', array('tt.id', '=', 'e.tweetid'), 'e')
 											  ->group_by("e.tweetid")
 											  ->find_many();
 		$tweet_stats = array();
+		$avg_retweet = 0;
 		foreach($stats as $stat) {
-			$tweet_stats[] = sprintf('<tr><td><a href="http://twitter.com/%s/status/%s">%s</a></td><td>%s</td></tr>', $app->app_settings->twitter_username,
-																													  $stat->tweetid,
-																													  $stat->tweetid,
-																													  $stat->rt_count);
+			$tweet_stats[] = sprintf('<tr><td><a href="%s">%s</a></td><td>%s</td><td><a href="http://twitter.com/%s/status/%s" target="_blank">View Tweet</a></td></tr>', $app->urlFor('view-track', array('id' => $stat->id)),
+																													  													  $stat->tweetid,
+																													  													  $stat->rt_count,
+																													  													  $app->app_settings->twitter_username,
+																													  													  $stat->tweetid);
+
+			$avg_retweet += $stat->rt_count;
 		}
 
 		$app->render('index.php', array(
@@ -90,7 +97,9 @@
 			'total_followers' => $total_followers,
 			'users_unfollowing' => implode($users_unfollowing),
 			'unfollowing_count' => $not_following_count,
-			'tweet_stats' => implode($tweet_stats)
+			'tweets_tracking' => $total_track,
+			'tweet_stats' => implode($tweet_stats),
+			'average_retweets' => floor($avg_retweet / $total_track)
 		));
 	});
 
