@@ -4,6 +4,8 @@
 	 * This bot needs to make sure that the user has followed the twitter account and that they have re-tweeted the contest message.
 	 **/
 
+	define('DATE_FMT', 'l, F j, Y h:i:s');
+
 	require_once('../vendor/autoload.php');
 
 	$app = new \Slim\Slim(array(
@@ -14,6 +16,10 @@
 	));
 
 	\ORM::configure('sqlite:../data/database.db');
+	\ORM::configure('logging', false);
+	\ORM::configure('logger', function($log_str, $query_time) {
+		printf("\t\t%s - %s<br />\n", $log_str, $query_time);
+	});
 
 	$app->add(new \Slim\Middleware\SessionCookie);
 	$app->add(new \Zeuxisoo\Whoops\Provider\Slim\WhoopsMiddleware);
@@ -24,15 +30,18 @@
  	$app->view->appendJavascriptFile('https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js')
 			  ->appendJavascriptFile('//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js')
 			  ->appendJavascriptFile('//cdnjs.cloudflare.com/ajax/libs/jasny-bootstrap/3.1.3/js/jasny-bootstrap.min.js')
+			  //->appendJavascriptFile('//cdnjs.cloudflare.com/ajax/libs/typeahead.js/0.10.4/dist/typeahead.bundle.min.js')
 			  ->appendJavascriptFile('/js/application.js');
 
 	$app->view->appendStylesheet('//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css')
-			  ->appendStyle("body { padding-top: 60px; }")
+			  ->appendStyle("body { padding-top: 60px; } table.collapse.in { display: table; }")
 			  ->appendStylesheet('//cdnjs.cloudflare.com/ajax/libs/jasny-bootstrap/3.1.3/css/jasny-bootstrap.min.css');
 
 	$settings = \ORM::for_table('settings')->select_many('name', 'value')->find_array();
 
 	$app->app_settings = (object) array_column($settings, 'value', 'name');
+
+	$app->view->setLayoutData('copyright', $app->app_settings->copyright);
 
 	// Setup Codebird Twitter stuff.
 	\Codebird\Codebird::setConsumerKey($app->app_settings->twitter_consumer_key, $app->app_settings->twitter_consumer_secret);
