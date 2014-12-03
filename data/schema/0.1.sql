@@ -42,4 +42,4 @@ INSERT INTO "settings" ("name", "value") VALUES ('twitter_consumer_secret', '');
 INSERT INTO "settings" ("name", "value") VALUES ('twitter_access_token', '');
 INSERT INTO "settings" ("name", "value") VALUES ('twitter_access_token_secret', '');
 INSERT INTO "settings" ("name", "value") VALUES ('last_run', '');
-INSERT INTO "settings" ("name", "value") VALUES ('twitter_username')
+INSERT INTO "settings" ("name", "value") VALUES ('twitter_username', '');
