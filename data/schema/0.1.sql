@@ -1,3 +1,4 @@
+DELETE FROM "sqlite_sequence";
 
 DROP TABLE IF EXISTS "entries";
 CREATE TABLE "entries" (
@@ -8,7 +9,6 @@ CREATE TABLE "entries" (
   FOREIGN KEY ("tweetid") REFERENCES "tracktweet" ("id")
 );
 
-
 DROP TABLE IF EXISTS "settings";
 CREATE TABLE "settings" (
   "id" integer NOT NULL PRIMARY KEY AUTOINCREMENT,
@@ -16,14 +16,12 @@ CREATE TABLE "settings" (
   "value" text NOT NULL
 );
 
-
 DROP TABLE IF EXISTS "tracktweet";
 CREATE TABLE "tracktweet" (
   "id" integer NOT NULL PRIMARY KEY AUTOINCREMENT,
   "tweetid" integer NOT NULL,
   "lasttracked" integer NOT NULL
 );
-
 
 DROP TABLE IF EXISTS "user";
 CREATE TABLE "user" (
@@ -45,3 +43,21 @@ INSERT INTO "settings" ("name", "value") VALUES ('last_run', '');
 INSERT INTO "settings" ("name", "value") VALUES ('twitter_username', '');
 INSERT INTO "settings" ("name", "value") VALUES ('winner_default_limit', '');
 INSERT INTO "settings" ("name", "value") VALUES ('copyright', '');
+
+DROP TABLE IF EXISTS "campaigns";
+CREATE TABLE "campaigns" (
+  "id" integer NOT NULL PRIMARY KEY AUTOINCREMENT,
+  "name" text NOT NULL,
+  "description" text NOT NULL,
+  "cost" integer NOT NULL,
+  "start_time" integer NOT NULL,
+  "end_time" integer NOT NULL,
+  "active" integer(1) NOT NULL DEFAULT '0',
+  "created" integer NOT NULL
+);
+
+CREATE TABLE "cron_messages" (
+  "id" integer NOT NULL PRIMARY KEY AUTOINCREMENT,
+  "timestamp" integer NOT NULL,
+  "json_dump" text NOT NULL
+);
