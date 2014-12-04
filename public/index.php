@@ -21,7 +21,13 @@
 		printf("\t\t%s - %s<br />\n", $log_str, $query_time);
 	});
 
-	$app->add(new \Slim\Middleware\SessionCookie);
+	$app->add(new \Slim\Middleware\SessionCookie(array(
+		'expires' => '20 minutes',
+		'path' => '/',
+		'domain' => null,
+		'secure' => false,
+		'httponly' => false
+	)));
 	$app->add(new \Zeuxisoo\Whoops\Provider\Slim\WhoopsMiddleware);
 
 	$app->view->setLayout('layout/layout.php');
@@ -52,6 +58,18 @@
 
 	$app->twitter->setToken($app->app_settings->twitter_access_token, $app->app_settings->twitter_access_token_secret);
 
+	if(isset($_SESSION['current_campaign'])) {
+		$app->view->setLayoutData('current_campaign', $_SESSION['current_campaign']);
+	}
+
+	$check_campaign = function() use($app) {
+		if(!isset($_SESSION['current_campaign']) || empty($_SESSION['current_campaign'])) {
+			$app->flash('warning', 'You need to specify a campaign to proceed.');
+			$app->redirect('/campaign');
+		}
+	};
+
+	// Campaign Stats.
 	$app->get('/', function() use($app) {
 		$last_run_date = date(DATE_FMT, $app->app_settings->last_run);
 
@@ -161,7 +179,7 @@
 			$app->render('track.php', array('active_track' => implode($active_track), 'timeline' => implode($track_timeline), 'username' => $app->app_settings->twitter_username));
 		});
 
-		$app->post('/add', function() use($app) {
+		$app->post('/add', $check_campaign, function() use($app) {
 			$url = $app->request->post('twitterurl');
 			$pieces = parse_url($url);
 			$id = array_pop(explode('/', $pieces['path']));
@@ -171,6 +189,7 @@
 				// Add it to the database.
 				$track = \ORM::for_table('tracktweet')->create();
 				$track->tweetid = $id;
+				$track->campaignid = 1; // Putting this in here for right now.
 				$track->lasttracked = time();
 					$track->save();
 				$app->flash('success', 'Added Status to Tracker.');
@@ -213,10 +232,10 @@
 	$app->get('/user/:id', function($id) use($app) {
 		$user = \ORM::for_table('user')->find_one($id);
 		var_dump(unserialize($user->user_object));
-		$app->render('user.php', array('username' => $user->username));
+		$app->render('user.php', array('username' => $user->username, 'user_object' => unserialize($user->user_object)));
 	})->name('user');
 
-	$app->map('/winner', function() use($app) {
+	$app->map('/winner', $check_campaign, function() use($app) {
 		$data_arr = array('follower_default' => 1, 'winner_default' => 1, 'exclude_default' => 1, 'number_default' => $app->app_settings->winner_default_limit);
 		if($app->request->isPost()) {
 			if($app->request->post('winnernumber') > 0) {
