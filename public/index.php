@@ -273,49 +273,132 @@
 		$app->render('winner.php', $data_arr);
 	})->via('GET', 'POST');
 
-	$app->group('/settings', function() use($app) {
+	$app->group('/settings', function() use($app, $settings) {
+		$app->get('/', function() use($app, $settings) {
+			$app->render('settings/index.php', array('settings' => $settings));
+		});
 
+		$app->map('/edit/:id', function($id) use($app) {
+
+		})->via('GET', 'POST')->name('settings-edit');
 	});
 
-	$app->get('/cron', function() use($app) {
-		// This is the main action
-		$stats = array('msgs' => array());
-		$time = time();
-		// First things first: we need to gather all of the tweets.
+	$app->group('/cron', function() use($app) {
+		$app->get('/', function() use($app) {
+			// This is the main action
+			$stats = array('msgs' => array(), 'retweet_count' => 0, 'follower_count' => 0, 'user_count' => 0);
+			$time = time();
+			// First things first: we need to gather all of the tweets.
 
-		$tracked_tweets = \ORM::for_table('tracktweet')->find_many();
-		foreach($tracked_tweets as $tweet) {
-			$retweeters = array();
-			$req_str = sprintf('id=%s', $tweet->tweetid);
-			$cursor = NULL;
-			do {
-				if(!is_null($cursor)) {
-					$req_str .= sprintf('&cursor=%s', $cursor);
-				}
-				$retweet_gather = $app->twitter->statuses_retweeters_ids($req_str, true);
-				$retweeters = array_merge($retweeters, $retweet_gather->ids);
+			$tracked_tweets = \ORM::for_table('tracktweet')->table_alias("tt")
+														   ->select_many(array('id' => 'tt.id', 'tweetid' => 'tt.tweetid'))
+														   ->left_outer_join("campaigns", array("tt.campaignid", '=', 'c.id'), 'c')
+														   ->where('c.active', 1)
+														   ->find_many();
+			foreach($tracked_tweets as $tweet) {
+				$retweeters = array();
+				$req_str = sprintf('id=%s', $tweet->tweetid);
+				$cursor = NULL;
+				do {
+					if(!is_null($cursor)) {
+						$req_str .= sprintf('&cursor=%s', $cursor);
+					}
+					$retweet_gather = $app->twitter->statuses_retweeters_ids($req_str, true);
+					$retweeters = array_merge($retweeters, $retweet_gather->ids);
 
-				if($retweet_gather->next_cursor !== 0) {
-					$cursor = $retweet_gather->next_cursor;
-				} else {
-					$cursor = NULL;
+					if($retweet_gather->next_cursor !== 0) {
+						$cursor = $retweet_gather->next_cursor;
+					} else {
+						$cursor = NULL;
+					}
+				} while(!is_null($cursor));
+				$stats['msgs'][] = sprintf('Number of Retweeters for ID#(%s): %s', $tweet->tweetid, count($retweeters));
+
+				foreach($retweeters as $rtid) {
+					// First, search for the user in the user table. If they don't exist, then we need to create a row for them.
+					$user = \ORM::for_table('user')->where('twitterid', $rtid)->find_one();
+					if($user === false) {
+						// Grab the information from the API.
+						$user_info = $app->twitter->users_show(sprintf('user_id=%s', $rtid), true);
+						$user = \ORM::for_table('user')->create();
+						$user->twitterid = $rtid;
+						$user->username = $user_info->screen_name;
+						$user->user_object = serialize($user_info);
+						$user->added = $time;
+						$user->save();
+						$stats['msgs'][] = sprintf('Added User (%s) to the database', $user->username);
+						$stats['user_count']++;
+					}
+
+					$entry_search = \ORM::for_table('entries')->where(array(
+						'userid' => $user->id,
+						'tweetid' => $tweet->id 
+					))->find_one();
+
+					if($entry_search === false) {
+						$entry = \ORM::for_table('entries')->create();
+						$entry->userid = $user->id;
+						$entry->tweetid = $tweet->id;
+						$entry->added = $time;
+						$entry->save();
+						$stats['msgs'][] = sprintf('Added Entry for User (%s) for Tweet ID#%s', $user->username, $tweet->tweetid);
+						$stats['retweet_count']++;
+					}
 				}
-			} while(!is_null($cursor));
-			if($app->request->isAjax()) {
-				printf('Number of Retweeters for ID#(%s): %s <br />', $tweet->tweetid, count($retweeters));
+
+				// Update time stamp on Tweet tracker.
+				$tweet->lasttracked = $time;
+				$tweet->save();
 			}
 
 
-		}
+			// Now we need to process followers ...
+			$users = \ORM::for_table('user')->select('username')->where('follower', 0)->find_array();
+			$user_arr = array_column($users, 'username');
+			foreach(array_chunk($user_arr, 100) as $user_chunk) {
+				$following = $app->twitter->friendships_lookup(http_build_query(array('screen_name' => implode(',', $user_chunk))));
+				foreach((array) $following as $id => $relationship) {
+					if(!is_object($relationship)) {
+						continue; // Skip the processing of these items.
+					}
+
+					$user = \ORM::for_table('user')->where('username', $relationship->screen_name)->find_one();
+					
+					if($user == false) {
+						continue;
+					}
+					if(in_array('followed_by', $relationship->connections)) {
+						$user->follower = 1;
+						$stats['msgs'][] = sprintf('Added Follower %s', $user->username);
+						$stats['follower_count']++;
+					} else {
+						$user->follower = 0;
+					}
+					$user->save();
+				}
+			}
+			$stats_json = json_encode($stats);
+			if($app->request->isAjax()) {
+				echo $stats_json;
+			} else {
+				// Add this to the database.
+				$cron_message = \ORM::for_table('cron_messages')->create();
+				$cron_message->timestamp = $time;
+				$cron_message->json_dump = $stats_json;
+				$cron_message->save();
+			}
+		});
+		$app->group('/messages', function() use($app) {
+			$app->get('/', function() use($app) {
+
+			});
+
+			$app->get('/view/:id', function($id) use($app) {
+
+			})->name('cron-messages-view');
+
+
+		});
 	});
 
 	$app->run();
-
-
-
-
-
-
-
-
-
