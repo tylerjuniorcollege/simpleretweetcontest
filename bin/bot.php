@@ -125,11 +125,8 @@
 	if($cli->opt('processfollowers')) {
 		$usercount = 0;
 		// Grab all of the retweeters and pass them in to an array.
-		$users = \ORM::for_table('user')->select('username')->where('follower', 0)->find_many();
-		$user_arr = array();
-		foreach($users as $user) {
-			$user_arr[] = $user->username;
-		}
+		$users = \ORM::for_table('user')->select('username')->where('follower', 0)->find_array();
+		$user_arr = array_column($users, 'username');
 
 		// Split array in to 100s.
 		foreach(array_chunk($user_arr, 100) as $user_chunk) {
