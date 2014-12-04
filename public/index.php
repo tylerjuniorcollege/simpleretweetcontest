@@ -4,7 +4,7 @@
 	 * This bot needs to make sure that the user has followed the twitter account and that they have re-tweeted the contest message.
 	 **/
 
-	define('DATE_FMT', 'l, F j, Y h:i:s');
+	define('DATE_FMT', 'l, F j, Y h:i:s a');
 
 	require_once('../vendor/autoload.php');
 
