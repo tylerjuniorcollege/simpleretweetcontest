@@ -201,6 +201,7 @@
 		});
 
 		$app->get('/view/:id', function($id) use($app) {
+			// Grab the oEmbeded code and display that with a list of retweeters.
 
 		})->name('view-track');
 
