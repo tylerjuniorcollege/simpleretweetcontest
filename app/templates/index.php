@@ -71,9 +71,35 @@
 </div>
 <div class="row">
 	<div class="col-md-12">
+		<h3 class="page-header"><a data-toggle="collapse" data-target="#toptweeters" href="#toptweeters" aria-expanded="false" aria-controls="toptweeters">Top Retweeters</a>
+								<a data-toggle="collapse" data-target="#toptweeters" href="#toptweeters" aria-expanded="false" aria-controls="toptweeters" class="pull-right"><span class="glyphicon glyphicon-chevron-down"></span></a></h3>
+		<div class="clearfix"></div>
+		<table class="table table-condensed table-hover collapse in" id="toptweeters">
+			<colgroup>
+				<col class="col-md-6">
+				<col class="col-md-6">
+			</colgroup>
+			<thead>
+				<tr>
+					<th>Username</th>
+					<th># of Retweets</th>
+				</tr>
+			</thead>
+			<tbody>
+			<?=$data['top_tweeters'] ?>
+			</tbody>
+		</table>
+	</div>
+</div>
+<div class="row">
+	<div class="col-md-12">
 		<h3 class="page-header"><a data-toggle="collapse" data-target="#notfollowing" href="#notfollowing" aria-expanded="true" aria-controls="notfollowing"><?= $data['unfollowing_count'] ?> Users not following ...</a>
 								<a data-toggle="collapse" data-target="#notfollowing" href="#notfollowing" aria-expanded="true" aria-controls="notfollowing" class="pull-right"><span class="glyphicon glyphicon-chevron-down"></span></a></h3>
 		<table class="table table-condensed table-hover collapse" id="notfollowing">
+			<colgroup>
+				<col class="col-md-6">
+				<col class="col-md-6">
+			</colgroup>
 			<thead>
 				<tr>
 					<th>Username</th>

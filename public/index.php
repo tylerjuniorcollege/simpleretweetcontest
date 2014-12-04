@@ -90,6 +90,21 @@
 			$avg_retweet += $stat->rt_count;
 		}
 
+		// Most Tweeters who Retweeted the status.
+		$most_tweeters = \ORM::for_table('user')->table_alias('u')
+												->select_many('u.id', 'u.username')
+												->select_expr('COUNT(e.userid)', 'rt_count')
+												->left_outer_join('entries', array('u.id', '=', 'e.userid'), 'e')
+												->group_by('e.userid')
+												->order_by_desc('rt_count')
+												->limit(10)
+												->find_many();
+
+		$top_tweeters = array();
+		foreach($most_tweeters as $tweeter) {
+			$top_tweeters[] = sprintf('<tr><td><a href="%s">%s</td><td>%s</td></tr>', $app->urlFor('user', array('id' => $tweeter->id)), $tweeter->username, $tweeter->rt_count);
+		}
+
 		$app->render('index.php', array(
 			'last_run' => $last_run_date,
 			'total_entries' => $total_entries,
@@ -99,12 +114,19 @@
 			'unfollowing_count' => $not_following_count,
 			'tweets_tracking' => $total_track,
 			'tweet_stats' => implode($tweet_stats),
-			'average_retweets' => floor($avg_retweet / $total_track)
+			'average_retweets' => floor($avg_retweet / $total_track),
+			'top_tweeters' => implode($top_tweeters)
 		));
 	});
 
-	$app->group('/track', function() use($app) {
+	$app->group('/campaign', function() use($app) {
 		$app->get('/', function() use($app) {
+			
+		});
+	});
+
+	$app->group('/track', function() use($app, $check_campaign) {
+		$app->get('/', $check_campaign, function() use($app) {
 			// Grab Current Statuses
 			$track = \ORM::for_table('tracktweet')->table_alias('tt')
 												  ->select_many('tt.id', 'tt.tweetid', 'tt.lasttracked')
