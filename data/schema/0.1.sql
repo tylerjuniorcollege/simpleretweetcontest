@@ -5,7 +5,7 @@ CREATE TABLE "entries" (
   "userid" integer NOT NULL,
   "tweetid" integer NOT NULL,
   "added" integer NOT NULL,
-  FOREIGN KEY ("userid") REFERENCES "user" ("userid"),
+  FOREIGN KEY ("userid") REFERENCES "user" ("id"),
   FOREIGN KEY ("tweetid") REFERENCES "tracktweet" ("id")
 );
 
@@ -20,7 +20,9 @@ DROP TABLE IF EXISTS "tracktweet";
 CREATE TABLE "tracktweet" (
   "id" integer NOT NULL PRIMARY KEY AUTOINCREMENT,
   "tweetid" integer NOT NULL,
-  "lasttracked" integer NOT NULL
+  "campaignid" integer NOT NULL,
+  "lasttracked" integer NOT NULL,
+  FOREIGN KEY ("campaignid") REFERENCES "campaign" ("id")
 );
 
 DROP TABLE IF EXISTS "user";
@@ -33,6 +35,15 @@ CREATE TABLE "user" (
   "winner" integer NOT NULL DEFAULT '0',
   "exclude" integer NOT NULL DEFAULT '0',
   "added" integer NOT NULL
+);
+
+DROP TABLE IF EXISTS "user_winner";
+CREATE TABLE "user_winner" (
+  "id" integer NOT NULL PRIMARY KEY AUTOINCREMENT,
+  "userid" integer NOT NULL,
+  "campaignid" integer NOT NULL,
+  FOREIGN KEY ("userid") REFERENCES "user" ("id"),
+  FOREIGN KEY ("campaignid") REFERENCES "campaign" ("id")
 );
 
 INSERT INTO "settings" ("name", "value") VALUES ('twitter_consumer_key', '');

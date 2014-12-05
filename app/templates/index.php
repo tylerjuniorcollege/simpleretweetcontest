@@ -1,6 +1,7 @@
 <div class="row">
-	<div class="col-md-12 page-header">
-		<h3>As of <small><?= $data['last_run']; ?></small></h3>
+	<div class="col-md-12">
+		<h2 class="page-header">Current Campaign:</h2>
+		<h3 class="page-header">As of <small><?= $data['last_run']; ?></small></h3>
 	</div>
 </div>
 <div class="row">

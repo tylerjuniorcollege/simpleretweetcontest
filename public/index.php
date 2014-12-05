@@ -3,6 +3,8 @@
 	 * Simple Contest Bot for Twitter.
 	 * This bot needs to make sure that the user has followed the twitter account and that they have re-tweeted the contest message.
 	 **/
+	session_cache_limiter(false);
+	session_start();
 
 	define('DATE_FMT', 'l, F j, Y h:i:s a');
 
@@ -21,13 +23,13 @@
 		printf("\t\t%s - %s<br />\n", $log_str, $query_time);
 	});
 
-	$app->add(new \Slim\Middleware\SessionCookie(array(
+	/* $app->add(new \Slim\Middleware\SessionCookie(array(
 		'expires' => '20 minutes',
 		'path' => '/',
 		'domain' => null,
 		'secure' => false,
 		'httponly' => false
-	)));
+	))); */
 	$app->add(new \Zeuxisoo\Whoops\Provider\Slim\WhoopsMiddleware);
 
 	$app->view->setLayout('layout/layout.php');
@@ -58,16 +60,22 @@
 
 	$app->twitter->setToken($app->app_settings->twitter_access_token, $app->app_settings->twitter_access_token_secret);
 
-	if(isset($_SESSION['current_campaign'])) {
-		$app->view->setLayoutData('current_campaign', $_SESSION['current_campaign']);
+	// Add a Campaign drop down to the layout.
+	$campaigns = \ORM::for_table('campaigns')->select_many('id', 'name')->order_by_asc('id')->order_by_desc('active')->find_array();
+	$app->view->setLayoutData('campaigns', array_column($campaigns, 'name', 'id'));
+
+	/* if(isset($_SESSION['current_campaign'])) {
+		$app->view->setLayoutData('current_campaign', $_SESSION['current_campaign']['id']);
+	} else {
+		$app->view->setLayoutData('current_campaign', 'none');
 	}
 
-	$check_campaign = function() use($app) {
+		$check_campaign = function() use($app) {
 		if(!isset($_SESSION['current_campaign']) || empty($_SESSION['current_campaign'])) {
 			$app->flash('warning', 'You need to specify a campaign to proceed.');
 			$app->redirect('/campaign');
 		}
-	};
+	}; */
 
 	// Campaign Stats.
 	$app->get('/', function() use($app) {
@@ -124,6 +132,7 @@
 		}
 
 		$app->render('index.php', array(
+			//'campaign_name' => $_SESSION['current_campaign']['name'],
 			'last_run' => $last_run_date,
 			'total_entries' => $total_entries,
 			'total_users' => $total_users,
@@ -139,12 +148,47 @@
 
 	$app->group('/campaign', function() use($app) {
 		$app->get('/', function() use($app) {
-			
+			$campaigns = \ORM::for_table('campaigns')->table_alias('c')
+													 ->select_many('c.id', 'c.name', 'c.description', 'c.start_time', 'c.end_time', 'c.active', 'c.created')
+													 ->select_expr('COUNT(e.tweetid)', 'rt_count')
+													 ->left_outer_join('tracktweet', array('c.id', '=', 'tt.campaignid'), 'tt')
+													 ->left_outer_join('entries', array('e.tweetid', '=', 'tt.id'), 'e')
+													 ->group_by('c.id')
+													 ->find_many();
+
+			$campaign_out = array();
+			foreach($campaigns as $campaign) {
+				$campaign_out[] = sprintf('<tr class="%s"><td><a href="%s">%s</a></td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td><a href="%s" class="btn btn-danger">Edit</a></td><td><a href="%s" class="btn btn-primary">Select</a></td></tr>',
+					($campaign->active == 1 ? 'success' : 'danger'),
+					$app->urlFor('campaign-edit', array('id' => $campaign->id)),
+					$campaign->name,
+					$campaign->description,
+					date(DATE_FMT, $campaign->created),
+					date(DATE_FMT, $campaign->start_time),
+					date(DATE_FMT, $campaign->end_time),
+					$campaign->rt_count,
+					$app->urlFor('campaign-edit', array('id' => $campaign->id)),
+					$app->urlFor('campaign-select', array('id' => $campaign->id))
+				);
+			}
+			$app->render('campaign/index.php', array('campaigns' => implode($campaign_out)));
 		});
+
+		$app->map('/edit/:id', function($id) use($app) {
+
+		})->via('GET', 'POST')->name('campaign-edit');
+
+		$app->get('/select/:id', function($id) use($app) {
+			$campaign = \ORM::for_table('campaigns')->find_one($id);
+			//$_SESSION['current_campaign']->as_array();
+
+			//$app->flash('success', sprintf('Campaign Selected: <strong>%s</strong>', $_SESSION['current_campaign']['name']));
+			$app->redirect('/');
+		})->name('campaign-select');
 	});
 
-	$app->group('/track', function() use($app, $check_campaign) {
-		$app->get('/', $check_campaign, function() use($app) {
+	$app->group('/track', function() use($app) {
+		$app->get('/', function() use($app) {
 			// Grab Current Statuses
 			$track = \ORM::for_table('tracktweet')->table_alias('tt')
 												  ->select_many('tt.id', 'tt.tweetid', 'tt.lasttracked')
@@ -179,7 +223,7 @@
 			$app->render('track.php', array('active_track' => implode($active_track), 'timeline' => implode($track_timeline), 'username' => $app->app_settings->twitter_username));
 		});
 
-		$app->post('/add', $check_campaign, function() use($app) {
+		$app->post('/add',  function() use($app) {
 			$url = $app->request->post('twitterurl');
 			$pieces = parse_url($url);
 			$id = array_pop(explode('/', $pieces['path']));
@@ -189,7 +233,7 @@
 				// Add it to the database.
 				$track = \ORM::for_table('tracktweet')->create();
 				$track->tweetid = $id;
-				$track->campaignid = 1; // Putting this in here for right now.
+				$track->campaignid = $_SESSION['current_campaign']['id']; // Putting this in here for right now.
 				$track->lasttracked = time();
 					$track->save();
 				$app->flash('success', 'Added Status to Tracker.');
@@ -236,7 +280,7 @@
 		$app->render('user.php', array('username' => $user->username, 'user_object' => unserialize($user->user_object)));
 	})->name('user');
 
-	$app->map('/winner', $check_campaign, function() use($app) {
+	$app->map('/winner', function() use($app) {
 		$data_arr = array('follower_default' => 1, 'winner_default' => 1, 'exclude_default' => 1, 'number_default' => $app->app_settings->winner_default_limit);
 		if($app->request->isPost()) {
 			if($app->request->post('winnernumber') > 0) {

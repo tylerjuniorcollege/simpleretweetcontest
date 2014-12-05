@@ -30,6 +30,16 @@
 					</button>
 			  		<a class="navbar-brand" href="/">Retweet Contest App</a>
 				</div>
+				<form class="navbar-form navbar-left">
+					<div class="btn-group">
+						<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Campaigns <span class="caret"></span></button>
+						<ul class="dropdown-menu" role="menu">
+							<?php foreach($data['campaigns'] as $id => $campaign) {
+								printf('<li%s><a href="/campaign/select/%s">%s</a></li>', (''), $id, $campaign);
+							} ?>
+						</ul>
+					</div>
+				</form>
 				<ul class="nav navbar-nav">
 					<li><a href="/track">Track a Tweet</a></li>
 			  	</ul>
