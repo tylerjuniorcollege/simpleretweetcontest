@@ -42,8 +42,8 @@
 			  ->appendJavascriptFile('/js/application.js');
 
 	$app->view->appendStylesheet('//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css')
-			  ->appendStyle("body { padding-top: 60px; } table.collapse.in { display: table; }")
-			  ->appendStylesheet('//cdnjs.cloudflare.com/ajax/libs/jasny-bootstrap/3.1.3/css/jasny-bootstrap.min.css');
+			  ->appendStylesheet('//cdnjs.cloudflare.com/ajax/libs/jasny-bootstrap/3.1.3/css/jasny-bootstrap.min.css')
+			  ->appendStylesheet('/css/application.css');
 
 	$settings = \ORM::for_table('settings')->select_many('name', 'value')->find_array();
 
@@ -361,13 +361,18 @@
 														   ->find_many();
 			foreach($tracked_tweets as $tweet) {
 				$retweeters = array();
-				$req_str = sprintf('id=%s', $tweet->tweetid);
+				$req_str = array('id' => $tweet->tweetid);
 				$cursor = NULL;
 				do {
 					if(!is_null($cursor)) {
-						$req_str .= sprintf('&cursor=%s', $cursor);
+						$req_str['cursor'] = $cursor;
 					}
-					$retweet_gather = $app->twitter->statuses_retweeters_ids($req_str, true);
+					do {
+						$retweet_gather = $app->twitter->statuses_retweeters_ids(http_build_query($req_str), true);
+						if(!is_object($retweet_gather))
+							sleep(10);
+					} while(!is_object($retweet_gather));
+
 					$retweeters = array_merge($retweeters, $retweet_gather->ids);
 
 					if($retweet_gather->next_cursor !== 0) {
@@ -383,7 +388,11 @@
 					$user = \ORM::for_table('user')->where('twitterid', $rtid)->find_one();
 					if($user === false) {
 						// Grab the information from the API.
-						$user_info = $app->twitter->users_show(sprintf('user_id=%s', $rtid), true);
+						do {
+							$user_info = $app->twitter->users_show(http_build_query(array('user_id' => $rtid)), true);
+							if(!is_object($user_info))
+								sleep(10);
+						} while(!is_object($user_info));
 						$user = \ORM::for_table('user')->create();
 						$user->twitterid = $rtid;
 						$user->username = $user_info->screen_name;
@@ -420,7 +429,11 @@
 			$users = \ORM::for_table('user')->select('username')->where('follower', 0)->find_array();
 			$user_arr = array_column($users, 'username');
 			foreach(array_chunk($user_arr, 100) as $user_chunk) {
-				$following = $app->twitter->friendships_lookup(http_build_query(array('screen_name' => implode(',', $user_chunk))));
+				do {
+					$following = $app->twitter->friendships_lookup(http_build_query(array('screen_name' => implode(',', $user_chunk))));
+					if(!is_object($following))
+						sleep(10);
+				} while(!is_object($following));
 				foreach((array) $following as $id => $relationship) {
 					if(!is_object($relationship)) {
 						continue; // Skip the processing of these items.
@@ -441,6 +454,12 @@
 					$user->save();
 				}
 			}
+
+			$lastrun = \ORM::for_table('settings')->where('name', 'last_run')->find_one();
+
+			$lastrun->value = $time;
+			$lastrun->save();
+			
 			$stats_json = json_encode($stats);
 			if($app->request->isAjax()) {
 				echo $stats_json;
