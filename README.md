@@ -21,3 +21,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
 ## Installation
+The App Currently has a two step install process.
+
+1) Download (Git clone or download zip) package and install [Composer](http://getcomposer.org) packages.
+
+2) Create a sqlite database and use the file `schema/0.1.sql` to create the tables.
