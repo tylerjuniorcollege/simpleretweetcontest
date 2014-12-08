@@ -64,18 +64,18 @@
 	$campaigns = \ORM::for_table('campaigns')->select_many('id', 'name')->order_by_asc('id')->order_by_desc('active')->find_array();
 	$app->view->setLayoutData('campaigns', array_column($campaigns, 'name', 'id'));
 
-	/* if(isset($_SESSION['current_campaign'])) {
+	if(isset($_SESSION['current_campaign'])) {
 		$app->view->setLayoutData('current_campaign', $_SESSION['current_campaign']['id']);
 	} else {
 		$app->view->setLayoutData('current_campaign', 'none');
 	}
 
-		$check_campaign = function() use($app) {
+	$check_campaign = function() use($app) {
 		if(!isset($_SESSION['current_campaign']) || empty($_SESSION['current_campaign'])) {
 			$app->flash('warning', 'You need to specify a campaign to proceed.');
 			$app->redirect('/campaign');
 		}
-	}; */
+	};
 
 	// Campaign Stats.
 	$app->get('/', function() use($app) {
@@ -132,7 +132,7 @@
 		}
 
 		$app->render('index.php', array(
-			//'campaign_name' => $_SESSION['current_campaign']['name'],
+			'campaign_name' => $_SESSION['current_campaign']['name'],
 			'last_run' => $last_run_date,
 			'total_entries' => $total_entries,
 			'total_users' => $total_users,
@@ -180,15 +180,15 @@
 
 		$app->get('/select/:id', function($id) use($app) {
 			$campaign = \ORM::for_table('campaigns')->find_one($id);
-			//$_SESSION['current_campaign']->as_array();
+			$_SESSION['current_campaign'] = $campaign->as_array();
 
-			//$app->flash('success', sprintf('Campaign Selected: <strong>%s</strong>', $_SESSION['current_campaign']['name']));
+			$app->flash('success', sprintf('Campaign Selected: <strong>%s</strong>', $_SESSION['current_campaign']['name']));
 			$app->redirect('/');
 		})->name('campaign-select');
 	});
 
-	$app->group('/track', function() use($app) {
-		$app->get('/', function() use($app) {
+	$app->group('/track', function() use($app, $check_campaign) {
+		$app->get('/', $check_campaign, function() use($app) {
 			// Grab Current Statuses
 			$track = \ORM::for_table('tracktweet')->table_alias('tt')
 												  ->select_many('tt.id', 'tt.tweetid', 'tt.lasttracked')
@@ -223,7 +223,7 @@
 			$app->render('track.php', array('active_track' => implode($active_track), 'timeline' => implode($track_timeline), 'username' => $app->app_settings->twitter_username));
 		});
 
-		$app->post('/add',  function() use($app) {
+		$app->post('/add', $check_campaign, function() use($app) {
 			$url = $app->request->post('twitterurl');
 			$pieces = parse_url($url);
 			$id = array_pop(explode('/', $pieces['path']));
@@ -280,7 +280,7 @@
 		$app->render('user.php', array('username' => $user->username, 'user_object' => unserialize($user->user_object)));
 	})->name('user');
 
-	$app->map('/winner', function() use($app) {
+	$app->map('/winner', $check_campaign, function() use($app) {
 		$data_arr = array('follower_default' => 1, 'winner_default' => 1, 'exclude_default' => 1, 'number_default' => $app->app_settings->winner_default_limit);
 		if($app->request->isPost()) {
 			if($app->request->post('winnernumber') > 0) {
@@ -473,7 +473,20 @@
 		});
 		$app->group('/messages', function() use($app) {
 			$app->get('/', function() use($app) {
+				$messages = \ORM::for_table('cron_messages')->order_by_desc('id')->limit(10)->find_many();
 
+				$cron_messages = array();
+				foreach($messages AS $message) {
+					$json = json_decode($message->json_dump);
+					$cron_messages[] = sprintf('<tr><td><a href="%s">%s</a></td><td>%s</td><td>%s</td><td>%s</td></tr>', 
+											   $app->urlFor('cron-messages-view', array('id' => $message->id)),
+											   date(DATE_FMT, $message->timestamp),
+											   $json->retweet_count,
+											   $json->user_count,
+											   $json->follower_count);
+				}
+
+				$app->render('cron/index.php', array('cron_messages' => implode($cron_messages)));
 			});
 
 			$app->get('/view/:id', function($id) use($app) {
