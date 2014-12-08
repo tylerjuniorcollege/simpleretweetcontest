@@ -35,14 +35,15 @@
 	$app->view->setLayout('layout/layout.php');
 
 	// This is the default layout files.
- 	$app->view->appendJavascriptFile('https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js')
-			  ->appendJavascriptFile('//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js')
-			  ->appendJavascriptFile('//cdnjs.cloudflare.com/ajax/libs/jasny-bootstrap/3.1.3/js/jasny-bootstrap.min.js')
-			  //->appendJavascriptFile('//cdnjs.cloudflare.com/ajax/libs/typeahead.js/0.10.4/dist/typeahead.bundle.min.js')
+ 	$app->view->appendJavascriptFile('/components/jquery/dist/jquery.min.js')
+			  ->appendJavascriptFile('/components/bootstrap/dist/js/bootstrap.min.js')
+			  ->appendJavascriptFile('/components/jasny-bootstrap/dist/js/jasny-bootstrap.min.js')
+			  ->appendJavascriptFile('/components/jquery-ajax-progress/js/jquery.ajax-progress.js')
 			  ->appendJavascriptFile('/js/application.js');
 
-	$app->view->appendStylesheet('//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css')
-			  ->appendStylesheet('//cdnjs.cloudflare.com/ajax/libs/jasny-bootstrap/3.1.3/css/jasny-bootstrap.min.css')
+	$app->view->appendStylesheet('/components/bootstrap/dist/css/bootstrap.min.css')
+			  ->appendStylesheet('/components/jasny-bootstrap/dist/css/jasny-bootstrap.min.css')
+			  ->appendStylesheet('/components/fontawesome/css/font-awesome.min.css')
 			  ->appendStylesheet('/css/application.css');
 
 	$settings = \ORM::for_table('settings')->select_many('name', 'value')->find_array();

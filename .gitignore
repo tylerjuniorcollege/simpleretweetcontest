@@ -1,3 +1,4 @@
 vendor/
 public/adminer.php
 data/database.db
+public/components/
