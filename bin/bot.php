@@ -83,7 +83,10 @@
 	if($cli->opt('processtweets')) {
 		$retweetcount = 0;
 		// Grabbing all of the retweets - First we need to get all of the tracking tweets.
-		$tweets = \ORM::for_table('tracktweet')->find_many();
+		$tweets = \ORM::for_table('tracktweet')->table_alias('tt')->select_many('tt.id', 'tt.tweetid', 'tt.lasttracked')
+											   ->left_outer_join('campaigns', array('tt.campaignid', '=', 'c.id'), 'c')
+											   ->where('c.active', 1)
+											   ->find_many();
 
 		//var_dump($tweets);
 		foreach($tweets as $tweet) {
@@ -196,6 +199,9 @@
 					if(!is_array($following->rate)) {
 						// Pause and try again
 						$retry = TRUE;
+					} else {
+						// Skip
+						continue 2;
 					}
 					print_rate_limit('showratelimit', $following->rate['limit'], $following->rate['remaining'], $following->rate['reset']);
 
