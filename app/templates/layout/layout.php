@@ -32,11 +32,17 @@
 				</div>
 				<form class="navbar-form navbar-left">
 					<div class="btn-group">
-						<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Campaigns <span class="caret"></span></button>
+						<a href="/campaign" class="btn btn-default">All Campaigns</a>
+						<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+							<span class="caret"></span>
+							<span class="sr-only">Show Campaigns</span>
+						</button>
 						<ul class="dropdown-menu" role="menu">
 							<?php foreach($data['campaigns'] as $id => $campaign) {
-								printf('<li%s><a href="/campaign/select/%s">%s</a></li>', (''), $id, $campaign);
+								printf('<li><a href="/campaign/select/%s">%s</a></li>', $id, $campaign);
 							} ?>
+							<li class="divider"></li>
+							<li><a href="/campaign/create">Start a New Campaign</a></li>
 						</ul>
 					</div>
 				</form>

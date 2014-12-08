@@ -65,21 +65,21 @@
 	$campaigns = \ORM::for_table('campaigns')->select_many('id', 'name')->order_by_asc('id')->order_by_desc('active')->find_array();
 	$app->view->setLayoutData('campaigns', array_column($campaigns, 'name', 'id'));
 
-	if(isset($_SESSION['current_campaign'])) {
+	if(isset($_SESSION['current_campaign']) && is_array($_SESSION['current_campaign'])) {
 		$app->view->setLayoutData('current_campaign', $_SESSION['current_campaign']['id']);
 	} else {
 		$app->view->setLayoutData('current_campaign', 'none');
 	}
 
 	$check_campaign = function() use($app) {
-		if(!isset($_SESSION['current_campaign']) || empty($_SESSION['current_campaign'])) {
+		if(!isset($_SESSION['current_campaign']) || empty($_SESSION['current_campaign']) || !is_array($_SESSION['current_campaign'])) {
 			$app->flash('warning', 'You need to specify a campaign to proceed.');
 			$app->redirect('/campaign');
 		}
 	};
 
 	// Campaign Stats.
-	$app->get('/', function() use($app) {
+	$app->get('/', $check_campaign, function() use($app) {
 		$last_run_date = date(DATE_FMT, $app->app_settings->last_run);
 
 		$total_entries = \ORM::for_table('entries')->count();
@@ -186,6 +186,10 @@
 			$app->flash('success', sprintf('Campaign Selected: <strong>%s</strong>', $_SESSION['current_campaign']['name']));
 			$app->redirect('/');
 		})->name('campaign-select');
+
+		$app->get('/create', function() use($app) {
+
+		});
 	});
 
 	$app->group('/track', function() use($app, $check_campaign) {
