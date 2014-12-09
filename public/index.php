@@ -23,13 +23,6 @@
 		printf("\t\t%s - %s<br />\n", $log_str, $query_time);
 	});
 
-	/* $app->add(new \Slim\Middleware\SessionCookie(array(
-		'expires' => '20 minutes',
-		'path' => '/',
-		'domain' => null,
-		'secure' => false,
-		'httponly' => false
-	))); */
 	$app->add(new \Zeuxisoo\Whoops\Provider\Slim\WhoopsMiddleware);
 
 	$app->view->setLayout('layout/layout.php');
@@ -354,6 +347,12 @@
 
 	$app->group('/cron', function() use($app) {
 		$app->get('/', function() use($app) {
+			$send_json = function($msg) use($app) {
+				if($app->request->isAjax()) {
+					echo json_encode(array('msg' => $msg));
+				}
+				return $msg;
+			};
 			// This is the main action
 			$stats = array('msgs' => array(), 'retweet_count' => 0, 'follower_count' => 0, 'user_count' => 0);
 			$time = time();
@@ -386,7 +385,7 @@
 						$cursor = NULL;
 					}
 				} while(!is_null($cursor));
-				$stats['msgs'][] = sprintf('Number of Retweeters for ID#(%s): %s', $tweet->tweetid, count($retweeters));
+				$stats['msgs'][] = $send_json(sprintf('Number of Retweeters for ID#(%s): %s', $tweet->tweetid, count($retweeters)));
 
 				foreach($retweeters as $rtid) {
 					// First, search for the user in the user table. If they don't exist, then we need to create a row for them.

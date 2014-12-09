@@ -61,6 +61,11 @@
 			  			<a href="/winner" id="findwinner" class="btn btn-danger" data-toggle="popover" data-content="Find a Winner"><span class="glyphicon glyphicon-user"></span></a>
 			  		</div>
 			  	</form>
+			  	<div class="nav navbar-text navbar-right progress" id="progressbar" style="width: 100px">
+			  		<div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 0%">
+			  			<span class="sr-only">100% Complete</span>
+			  		</div>
+			  	</div>
 		  	</div>
 		</div>
 		<div class="container">
