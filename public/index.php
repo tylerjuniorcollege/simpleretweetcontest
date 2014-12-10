@@ -7,6 +7,7 @@
 	session_start();
 
 	define('DATE_FMT', 'l, F j, Y h:i:s a');
+	define('CAMPAIGN_SESSION', 'current_campaign');
 
 	require_once('../vendor/autoload.php');
 
@@ -58,14 +59,14 @@
 	$campaigns = \ORM::for_table('campaigns')->select_many('id', 'name')->order_by_asc('id')->order_by_desc('active')->find_array();
 	$app->view->setLayoutData('campaigns', array_column($campaigns, 'name', 'id'));
 
-	if(isset($_SESSION['current_campaign']) && is_array($_SESSION['current_campaign'])) {
-		$app->view->setLayoutData('current_campaign', $_SESSION['current_campaign']['id']);
+	if(isset($_SESSION[CAMPAIGN_SESSION]) && is_array($_SESSION[CAMPAIGN_SESSION])) {
+		$app->view->setLayoutData(CAMPAIGN_SESSION, $_SESSION[CAMPAIGN_SESSION]['id']);
 	} else {
-		$app->view->setLayoutData('current_campaign', 'none');
+		$app->view->setLayoutData(CAMPAIGN_SESSION, 'none');
 	}
 
 	$check_campaign = function() use($app) {
-		if(!isset($_SESSION['current_campaign']) || empty($_SESSION['current_campaign']) || !is_array($_SESSION['current_campaign'])) {
+		if(!isset($_SESSION[CAMPAIGN_SESSION]) || empty($_SESSION[CAMPAIGN_SESSION]) || !is_array($_SESSION[CAMPAIGN_SESSION])) {
 			$app->flash('warning', 'You need to specify a campaign to proceed.');
 			$app->redirect('/campaign');
 		}
@@ -126,7 +127,7 @@
 		}
 
 		$app->render('index.php', array(
-			'campaign_name' => $_SESSION['current_campaign']['name'],
+			'campaign_name' => $_SESSION[CAMPAIGN_SESSION]['name'],
 			'last_run' => $last_run_date,
 			'total_entries' => $total_entries,
 			'total_users' => $total_users,
@@ -142,6 +143,8 @@
 
 	$app->group('/campaign', function() use($app) {
 		$app->get('/', function() use($app) {
+			// Unset Session Variable
+			unset($_SESSION[CAMPAIGN_SESSION]);
 			$campaigns = \ORM::for_table('campaigns')->table_alias('c')
 													 ->select_many('c.id', 'c.name', 'c.description', 'c.start_time', 'c.end_time', 'c.active', 'c.created')
 													 ->select_expr('COUNT(e.tweetid)', 'rt_count')
@@ -174,9 +177,9 @@
 
 		$app->get('/select/:id', function($id) use($app) {
 			$campaign = \ORM::for_table('campaigns')->find_one($id);
-			$_SESSION['current_campaign'] = $campaign->as_array();
+			$_SESSION[CAMPAIGN_SESSION] = $campaign->as_array();
 
-			$app->flash('success', sprintf('Campaign Selected: <strong>%s</strong>', $_SESSION['current_campaign']['name']));
+			$app->flash('success', sprintf('Campaign Selected: <strong>%s</strong>', $_SESSION[CAMPAIGN_SESSION]['name']));
 			$app->redirect('/');
 		})->name('campaign-select');
 
@@ -231,7 +234,7 @@
 				// Add it to the database.
 				$track = \ORM::for_table('tracktweet')->create();
 				$track->tweetid = $id;
-				$track->campaignid = $_SESSION['current_campaign']['id']; // Putting this in here for right now.
+				$track->campaignid = $_SESSION[CAMPAIGN_SESSION]['id']; // Putting this in here for right now.
 				$track->lasttracked = time();
 					$track->save();
 				$app->flash('success', 'Added Status to Tracker.');
